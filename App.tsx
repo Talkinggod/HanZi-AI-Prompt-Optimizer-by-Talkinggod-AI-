@@ -12,7 +12,7 @@ import { PerformanceMetricsDisplay } from './components/PerformanceMetricsDispla
 import { OptimizationSettings } from './components/OptimizationSettings';
 import { RfqDialog } from './components/RfqDialog';
 import { HistoryPanel } from './components/HistoryPanel';
-import { optimizePromptWithGemini, getResponseFromGeminiStream } from './services/geminiService';
+import { optimizePromptWithGemini, getResponseFromGeminiStream, optimizeWithDSPy } from './services/geminiService';
 import type { TokenCounts, OptimizationSettings as OptimizationSettingsType, HistoryItem, PerformanceMetrics } from './types';
 
 export default function App() {
@@ -57,6 +57,8 @@ export default function App() {
       targetModel: 'gemini',
       useXml: true,
       reasoningStrategy: 'none',
+      useDspy: false,
+      dspyOptimizationLevel: 'basic',
     },
     legal: {
       formality: 'brief',
@@ -113,7 +115,13 @@ export default function App() {
 
     try {
       const startTime = performance.now();
-      const result = await optimizePromptWithGemini(promptToOptimize, settings, isArtImageMode ? imageInput : null);
+      
+      const optimizationFunction = settings.advanced.useDspy
+        ? optimizeWithDSPy
+        : optimizePromptWithGemini;
+        
+      const result = await optimizationFunction(promptToOptimize, settings, isArtImageMode ? imageInput : null);
+      
       const endTime = performance.now();
       
       if (result.needsClarification) {

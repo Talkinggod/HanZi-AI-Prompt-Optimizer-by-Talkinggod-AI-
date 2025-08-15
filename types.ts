@@ -46,6 +46,8 @@ export interface AdvancedSettings {
   targetModel: 'gemini' | 'claude' | 'deepseek' | 'llama' | 'grok';
   useXml: boolean;
   reasoningStrategy: 'none' | 'tree-of-thought' | 'rewoo' | 'chain-of-thought';
+  useDspy: boolean;
+  dspyOptimizationLevel: 'basic' | 'advanced' | 'expert';
 }
 
 export interface OptimizationSettings {
@@ -65,3 +67,17 @@ export interface PerformanceMetrics {
   semanticFidelity: number; // mocked 0-1 scale
   instructionAdherence: number; // mocked 0-1 scale
 }
+
+export type OptimizationSuccess = {
+  needsClarification: false;
+  optimizedPrompt: string;
+  originalTokens: number;
+  optimizedTokens: number;
+};
+
+export type OptimizationClarification = {
+  needsClarification: true;
+  question: string;
+};
+
+export type OptimizationResult = OptimizationSuccess | OptimizationClarification;

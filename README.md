@@ -1,4 +1,3 @@
-
 # HanZi Prompt Optimizer
 
 This application optimizes LLM prompts by increasing token efficiency using Chinese Hanzi and applying advanced prompt engineering techniques via a middleware strategy. It is powered by the Google Gemini API.
@@ -55,18 +54,65 @@ An alternative considered was spawning a Python process from the Vercel serverle
 
 The microservice approach solves these issues by allowing the DSPy service to remain "warm," scale independently, and handle long-running tasks reliably.
 
-### 3. Implementation Plan & Next Steps
+### 3. API Contract for DSPy Microservice
 
-The frontend UI for this feature has already been built and is currently in a disabled state. The next phase is to build and deploy the backend microservice.
+This section defines the precise API contract that the backend Python service must adhere to for seamless integration.
+
+-   **Endpoint:** `/optimize`
+-   **Method:** `POST`
+-   **Content-Type:** `application/json`
+
+#### Request Body Schema
+
+The frontend will send a JSON object with the following structure:
+
+```json
+{
+  "prompt": "The user's original, un-optimized prompt.",
+  "industry": "none" | "tech" | "finance" | "medical" | "law" | "art",
+  "optimizationLevel": "basic" | "advanced" | "expert"
+}
+```
+
+-   `prompt` (string, required): The raw text prompt from the user.
+-   `industry` (string, required): The currently selected industry glossary. This allows the DSPy service to load relevant few-shot examples.
+-   `optimizationLevel` (string, required): The user-selected level of optimization, which can be used by the backend to determine the number of optimization rounds or complexity.
+
+#### Success Response Schema
+
+On a successful optimization (HTTP `200 OK`), the backend must return a JSON object with the following structure:
+
+```json
+{
+  "optimizedPrompt": "The new prompt that has been refined by the DSPy module."
+}
+```
+
+-   `optimizedPrompt` (string, required): The resulting prompt after DSPy processing.
+
+#### Error Response Schema
+
+In case of an error (HTTP `4xx` or `5xx`), the backend should return a JSON object with an `error` key:
+
+```json
+{
+  "error": "A descriptive error message explaining what went wrong."
+}
+```
+
+### 4. Implementation Plan & Next Steps
+
+The frontend UI for this feature has been built and is currently mocked. The next phase is to build and deploy the backend microservice according to the API contract above.
 
 **Step 1: Build the DSPy Microservice (Python)**
 - Use a lightweight framework like **FastAPI**.
-- Define a Pydantic model for the request body (`{ prompt: string, ... }`).
+- Use Pydantic to define models that match the **Request Body Schema**.
 - Create an `/optimize` endpoint that runs the DSPy `teleprompter.compile()` and execution logic.
+- Return a response matching the **Success Response Schema** or **Error Response Schema**.
 - *File: `dspy_service/app.py`*
 
 **Step 2: Containerize the Service (Docker)**
-- Create a `Dockerfile` to package the FastAPI application and its Python dependencies (`dspy-ai`, `uvicorn`, `anthropic` or `google-generativeai`).
+- Create a `Dockerfile` to package the FastAPI application and its Python dependencies (`dspy-ai`, `uvicorn`, etc.).
 - This ensures a consistent, reproducible environment.
 
 **Step 3: Deploy the Microservice**
@@ -81,11 +127,8 @@ The frontend UI for this feature has already been built and is currently in a di
 **Step 5: Create the Next.js Proxy Route**
 - Create a new API route file: `pages/api/dspy-optimize.ts`.
 - This route will receive the request from the frontend.
-- It will use `fetch` to call `process.env.DSPY_API_URL`, forwarding the prompt.
+- It will use `fetch` to call `process.env.DSPY_API_URL`, forwarding the prompt according to the API contract.
 - This keeps the microservice URL secure and hidden from the client.
 
 **Step 6: Activate the Frontend UI**
-- In `components/AdvancedPanel.tsx`, remove the `disabled={true}` prop from the "Auto-Optimization (DSPy)" toggle.
-- In `App.tsx`, update the `handleOptimizationRequest` function to check if DSPy is enabled. If so, it should call `/api/dspy-optimize` and handle the loading/response states.
-
-By following this plan, you can seamlessly integrate the powerful Python-based DSPy capabilities into the application while maintaining a clean, secure, and scalable architecture.
+- **This step is complete.** The `optimizeWithDSPy` function in `services/geminiService.ts` contains the mocked logic. To make it live, replace the mocked `setTimeout` logic with a real `fetch` call to `/api/dspy-optimize`.

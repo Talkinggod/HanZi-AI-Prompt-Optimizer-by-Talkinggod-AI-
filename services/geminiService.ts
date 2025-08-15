@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type, Content, Part } from "@google/genai";
-import type { OptimizationSettings, TechOptimizationSettings, FinanceOptimizationSettings, MedicalOptimizationSettings, ArtOptimizationSettings } from '../types';
+import type { OptimizationSettings, TechOptimizationSettings, FinanceOptimizationSettings, MedicalOptimizationSettings, ArtOptimizationSettings, OptimizationResult, OptimizationSuccess } from '../types';
 
 if (!process.env.API_KEY) {
     throw new Error("API_KEY environment variable not set.");
@@ -230,7 +230,7 @@ const optimizerResponseSchema = {
  * @param imageInput Optional base64 encoded image string.
  * @returns An object indicating if clarification is needed or containing the optimized prompt and token counts.
  */
-export const optimizePromptWithGemini = async (originalPrompt: string, settings: OptimizationSettings, imageInput: string | null = null) => {
+export const optimizePromptWithGemini = async (originalPrompt: string, settings: OptimizationSettings, imageInput: string | null = null): Promise<OptimizationResult> => {
     
     // --- Advanced Prompt Engineering Pipeline ---
     let processedPrompt = originalPrompt;
@@ -307,6 +307,61 @@ export const optimizePromptWithGemini = async (originalPrompt: string, settings:
         optimizedTokens: optimizedTokensResponse.totalTokens,
     };
 };
+
+/**
+ * MOCKS a call to a dedicated DSPy backend service.
+ * This simulates the API call and returns a mocked response.
+ * @param originalPrompt The user's original prompt.
+ * @param settings The user-configured optimization settings.
+ * @returns A mocked optimization result.
+ */
+export const optimizeWithDSPy = async (originalPrompt: string, settings: OptimizationSettings): Promise<OptimizationSuccess> => {
+    console.log("Simulating DSPy backend call with settings:", settings.advanced);
+    
+    const delayMap = {
+        basic: 2000,
+        advanced: 5000,
+        expert: 10000
+    };
+    const delay = delayMap[settings.advanced.dspyOptimizationLevel];
+
+    // Simulate network latency
+    await new Promise(resolve => setTimeout(resolve, delay));
+    
+    // In a real implementation, this would be a fetch call:
+    /*
+    const response = await fetch('/api/dspy-optimize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            prompt: originalPrompt,
+            industry: settings.industryGlossary,
+            optimizationLevel: settings.advanced.dspyOptimizationLevel
+        })
+    });
+    if (!response.ok) {
+        throw new Error('DSPy optimization failed');
+    }
+    const data = await response.json();
+    const optimizedPrompt = data.optimizedPrompt;
+    */
+    
+    // Mocked response for now
+    const optimizedPrompt = `[DSPy ${settings.advanced.dspyOptimizationLevel} MOCK]\n「${originalPrompt}」- 根据行业: ${settings.industryGlossary} 进行自动优化和机器学习提炼。`;
+
+    const [originalTokensResponse, optimizedTokensResponse] = await Promise.all([
+        ai.models.countTokens({ model: responseModel, contents: originalPrompt }),
+        ai.models.countTokens({ model: responseModel, contents: optimizedPrompt }),
+    ]);
+
+    return {
+        needsClarification: false,
+        optimizedPrompt,
+        originalTokens: originalTokensResponse.totalTokens,
+        optimizedTokens: optimizedTokensResponse.totalTokens,
+    };
+};
+
 
 /**
  * Gets a streaming response from the Gemini API for a given prompt.

@@ -105,11 +105,29 @@ export const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ settings, onSettin
                 />
                  <Toggle 
                     label="Auto-Optimization (DSPy)"
-                    checked={false}
-                    onChange={() => {}}
-                    disabled={true}
+                    checked={settings.useDspy}
+                    onChange={(checked) => handleSettingChange('useDspy', checked)}
+                    disabled={disabled}
                     tooltip="Enable DSPy-based continuous prompt refinement. Requires a dedicated backend."
                 />
+                 {settings.useDspy && (
+                    <div className="space-y-2 pl-4 border-l-2 border-brand-accent/50 ml-2">
+                        <label htmlFor="dspy-level" className="block text-sm font-medium text-brand-subtle">
+                            Optimization Level
+                        </label>
+                        <select
+                            id="dspy-level"
+                            value={settings.dspyOptimizationLevel}
+                            onChange={(e) => handleSettingChange('dspyOptimizationLevel', e.target.value as AdvancedSettings['dspyOptimizationLevel'])}
+                            disabled={disabled}
+                            className={commonSelectClass}
+                        >
+                            <option value="basic">Basic (fast)</option>
+                            <option value="advanced">Advanced (slower)</option>
+                            <option value="expert">Expert (very slow)</option>
+                        </select>
+                    </div>
+                 )}
             </div>
         </div>
     );
