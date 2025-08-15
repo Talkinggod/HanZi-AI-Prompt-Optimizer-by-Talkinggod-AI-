@@ -69,6 +69,7 @@ export const AdvancedPanel: React.FC<AdvancedPanelProps> = ({ settings, onSettin
                     >
                         <option value="gemini">Gemini</option>
                         <option value="claude">Claude</option>
+                        <option value="openai">OpenAI (GPTs)</option>
                         <option value="deepseek">DeepSeek</option>
                         <option value="llama">Llama</option>
                         <option value="grok">Grok</option>

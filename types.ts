@@ -43,7 +43,7 @@ export interface ArtOptimizationSettings {
 }
 
 export interface AdvancedSettings {
-  targetModel: 'gemini' | 'claude' | 'deepseek' | 'llama' | 'grok';
+  targetModel: 'gemini' | 'claude' | 'deepseek' | 'llama' | 'grok' | 'openai';
   useXml: boolean;
   reasoningStrategy: 'none' | 'tree-of-thought' | 'rewoo' | 'chain-of-thought';
   useDspy: boolean;

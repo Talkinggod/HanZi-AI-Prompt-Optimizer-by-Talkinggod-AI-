@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type, Content, Part } from "@google/genai";
 import type { OptimizationSettings, TechOptimizationSettings, FinanceOptimizationSettings, MedicalOptimizationSettings, ArtOptimizationSettings, OptimizationResult, OptimizationSuccess } from '../types';
 
@@ -41,6 +40,7 @@ const MODEL_OPTIMIZATION_RULES: { [key: string]: { preprocessor: (text: string) 
   },
   llama: { preprocessor: (text) => `[INST] ${text} [/INST]` },
   grok: { preprocessor: (text) => `[prompt]\n${text}\n[response]` },
+  openai: { preprocessor: (text) => `You are a world-class expert. Fulfill the following request precisely:\n\n${text}` },
 };
 
 function applyModelOptimization(prompt: string, model: string): string {
