@@ -16,6 +16,17 @@ This project is dual-licensed:
 - **Commercial licenses** available for proprietary integrations (contact contact@talkinggod.ai). 
 
 
+Advanced Optimization Panel: A new UI section that allows you to:
+Select a target LLM model (e.g., Gemini, Claude, DeepSeek) to apply model-specific syntax optimizations.
+Enable Anthropic-style XML tagging to structure prompts for better clarity and performance.
+Choose a reasoning strategy like Tree-of-Thoughts or ReWOO to guide the model's problem-solving process.
+Sophisticated Prompt Construction: The backend logic now chains your selections together, wrapping the original prompt in layers of targeted instructions (XML tags, reasoning modules, model-specific prefixes) before sending it to the Gemini API for optimization.
+Performance Metrics: The app now provides deeper insights beyond just token counts. After each optimization, a new panel displays:
+Latency: The time taken for the optimization request to complete.
+Semantic Fidelity & Instruction Adherence: Mocked scores that simulate how well the optimized prompt retains the original's meaning and follows instructions, demonstrating a more holistic approach to quality analysis.
+Seamless Integration: All new components are built to match the existing visual theme, ensuring a consistent and professional user experience.
+
+
 **Copyright © 2024 Talkinggod AI. All rights reserved.**
 
 
