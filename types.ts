@@ -42,13 +42,26 @@ export interface ArtOptimizationSettings {
   colorPaletteFocus: 'vibrant' | 'monochromatic' | 'pastel' | 'earth-tones';
 }
 
+export interface AdvancedSettings {
+  targetModel: 'gemini' | 'claude' | 'deepseek' | 'llama' | 'grok';
+  useXml: boolean;
+  reasoningStrategy: 'none' | 'tree-of-thought' | 'rewoo' | 'chain-of-thought';
+}
+
 export interface OptimizationSettings {
   hanziDensity: number; // 0-100
   industryGlossary: 'none' | 'tech' | 'finance' | 'medical' | 'law' | 'art';
   classicalMode: boolean;
+  advanced: AdvancedSettings;
   legal?: LegalOptimizationSettings;
   tech?: TechOptimizationSettings;
   finance?: FinanceOptimizationSettings;
   medical?: MedicalOptimizationSettings;
   art?: ArtOptimizationSettings;
+}
+
+export interface PerformanceMetrics {
+  latency: number; // in ms
+  semanticFidelity: number; // mocked 0-1 scale
+  instructionAdherence: number; // mocked 0-1 scale
 }

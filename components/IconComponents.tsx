@@ -71,3 +71,23 @@ export const IconX: React.FC<IconProps> = ({ className }) => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
     </svg>
 );
+
+export const IconCpuChip: React.FC<IconProps> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h1a2 2 0 002-2v-1a2 2 0 012-2h1.945M7.881 4.002l1.415 1.414M14.706 4.002l-1.414 1.414M7.881 20l1.415-1.414M14.706 20l-1.414-1.414M5 11V9a2 2 0 012-2h10a2 2 0 012 2v2M5 15v2a2 2 0 002 2h10a2 2 0 002-2v-2" />
+        <rect x="7" y="9" width="10" height="6" rx="1" />
+    </svg>
+);
+
+export const IconLayers: React.FC<IconProps> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 10l9-7 9 7-9 7-9-7z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 14l9-7 9 7" />
+    </svg>
+);
+
+export const IconCodeXml: React.FC<IconProps> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+    </svg>
+);

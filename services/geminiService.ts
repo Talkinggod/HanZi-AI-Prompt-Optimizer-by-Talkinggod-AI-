@@ -12,6 +12,68 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 const optimizerModel = 'gemini-2.5-flash'; // Fast, cheap model for optimization.
 const responseModel = 'gemini-2.5-flash';  // Can be a more powerful model in a real scenario.
 
+// --- Advanced Prompt Engineering Modules ---
+
+const XML_TAG_PRESETS: { [key: string]: string } = {
+  CLAUDE_FINANCE: `<report type="financial"><timeframe>quarterly</timeframe><sections>executive_summary,key_metrics,forecast</sections></report>`,
+  CLAUDE_LEGAL: `<analysis context="legal"><jurisdiction>NY</jurisdiction><doctrine>summary_judgment</doctrine></analysis>`,
+  DEEPSEEK_TECH: `<spec format="markdown"><components>architecture,apis,security</components></spec>`
+};
+
+function applyXMLTags(prompt: string, model: string, industry: string): string {
+  const key = `${model.toUpperCase()}_${industry.toUpperCase()}`;
+  const template = XML_TAG_PRESETS[key];
+  if (template) {
+    return `${template}\n${prompt}`;
+  }
+  return `<structured>${prompt}</structured>`;
+}
+
+const MODEL_OPTIMIZATION_RULES: { [key: string]: { preprocessor: (text: string) => string } } = {
+  claude: {
+    preprocessor: (text) => text.replace(/\. /g, '.\n<thinking>') + '</thinking>',
+  },
+  deepseek: {
+    preprocessor: (text) => `REASONING TRACE:\n${text}\nFINAL CONCLUSION:`,
+  },
+  gemini: {
+    preprocessor: (text) => `Let's think step-by-step:\n1. ${text}\nAnswer:`,
+  },
+  llama: { preprocessor: (text) => `[INST] ${text} [/INST]` },
+  grok: { preprocessor: (text) => `[prompt]\n${text}\n[response]` },
+};
+
+function applyModelOptimization(prompt: string, model: string): string {
+    const rule = MODEL_OPTIMIZATION_RULES[model as keyof typeof MODEL_OPTIMIZATION_RULES];
+    return rule ? rule.preprocessor(prompt) : prompt;
+}
+
+const REASONING_MODULES: { [key: string]: (prompt: string) => string } = {
+  'tree-of-thought': (prompt, branches = 3) => {
+    let xml = '<tothoughts>\n';
+    for (let i = 0; i < branches; i++) {
+      xml += `<branch weight="${(1/(i+1)).toFixed(2)}">${prompt}?option${i+1}</branch>\n`;
+    }
+    return xml + '</tothoughts>';
+  },
+  'rewoo': (prompt) => `
+    <rewoo>
+      <planner>Break into: 1) Research 2) Analysis 3) Synthesis</planner>
+      <worker tool="web_search">Context for: ${prompt}</worker>
+      <solver>Combine evidence into final output</solver>
+    </rewoo>
+  `,
+  'chain-of-thought': (prompt) => 
+    `<cot>Step 1: Understand "${prompt}"\nStep 2: Analyze...\nStep 3: Conclude</cot>`
+};
+
+function applyReasoningModule(prompt: string, strategy: string): string {
+    const module = REASONING_MODULES[strategy as keyof typeof REASONING_MODULES];
+    return module ? module(prompt) : prompt;
+}
+
+// --- System Instructions ---
+
 const COMMON_JSON_INSTRUCTION = `Your entire output MUST be a single JSON object.
 
 If the user's prompt is ambiguous or lacks key details for a high-quality analysis, you MUST ask for clarification. Do this by setting 'clarificationNeeded' to true and providing a clear, direct question in the 'question' field.
@@ -169,16 +231,33 @@ const optimizerResponseSchema = {
  * @returns An object indicating if clarification is needed or containing the optimized prompt and token counts.
  */
 export const optimizePromptWithGemini = async (originalPrompt: string, settings: OptimizationSettings, imageInput: string | null = null) => {
+    
+    // --- Advanced Prompt Engineering Pipeline ---
+    let processedPrompt = originalPrompt;
+    
+    // 1. Apply XML tagging if enabled
+    if (settings.advanced.useXml) {
+        processedPrompt = applyXMLTags(processedPrompt, settings.advanced.targetModel, settings.industryGlossary);
+    }
+    
+    // 2. Apply reasoning module
+    if (settings.advanced.reasoningStrategy !== 'none') {
+        processedPrompt = applyReasoningModule(processedPrompt, settings.advanced.reasoningStrategy);
+    }
+    
+    // 3. Apply model-specific optimization
+    processedPrompt = applyModelOptimization(processedPrompt, settings.advanced.targetModel);
+
     const systemInstruction = buildOptimizerSystemInstruction(settings, !!imageInput);
     
     const content: Content[] | string = imageInput
       ? [{
           parts: [
-            { text: originalPrompt || "Analyze this image and generate a descriptive, optimized prompt based on it." },
+            { text: processedPrompt || "Analyze this image and generate a descriptive, optimized prompt based on it." },
             { inlineData: { mimeType: 'image/jpeg', data: imageInput } }
           ]
         }]
-      : originalPrompt;
+      : processedPrompt;
 
     const optimizerResponse = await ai.models.generateContent({
         model: optimizerModel,
