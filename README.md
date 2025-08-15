@@ -1,134 +1,96 @@
-# HanZi Prompt Optimizer
+# HanZi Prompt Optimizer (T3 Stack Edition)
 
-This application optimizes LLM prompts by increasing token efficiency using Chinese Hanzi and applying advanced prompt engineering techniques via a middleware strategy. It is powered by the Google Gemini API.
+This application optimizes LLM prompts by increasing token efficiency using Chinese Hanzi and applying advanced prompt engineering techniques. It is powered by the Google Gemini API and built on the T3 Stack for a fully type-safe, modern web experience.
 
-## Core Features
+## The Stack
 
-- **Token Economization:** Reduces prompt token count by substituting English words with more token-efficient Chinese characters (Hanzi).
-- **Advanced Prompt Middleware:** A sophisticated pipeline that applies model-specific optimizations, reasoning strategies, and structural tagging to prompts before they are sent for optimization.
-- **Industry-Specific Glossaries:** Tailors optimizations for specific domains like Technology, Finance, Law, and more.
-- **History Tracking:** Saves and allows reuse of past optimization sessions.
-- **Performance Analytics:** Provides metrics beyond token count, including latency and simulated quality scores.
+- **Framework:** Next.js (App Router)
+- **API:** tRPC
+- **Styling:** Tailwind CSS
+- **Deployment:** Vercel
 
 ---
 
-## Architecture Guide: Implementing the DSPy Backend
+## Project Setup & Deployment Guide
 
-This section outlines the plan for integrating the Python-based DSPy framework for automated, machine-learning-driven prompt refinement.
+This project has been migrated from a buildless prototype to a professional T3 Stack application. Follow these steps to set up your local environment and deploy to Vercel.
 
-### 1. The Goal & The Challenge
+### Step 1: Create the T3 Application
 
-**Goal:** To add a powerful "Auto-Optimization" feature that uses `dspy-ai` to continuously refine prompts based on performance, moving beyond rule-based optimization.
+On your local machine, run the `create-t3-app` command to generate the boilerplate. **It is crucial to select the options that match this project's structure.**
 
-**Challenge:** The main application is a standard Next.js/TypeScript project running in a Node.js environment. DSPy is a Python framework with heavy dependencies (e.g., PyTorch). A Python environment cannot run directly within the Node.js Vercel serverless environment, requiring a separate service.
-
-### 2. Recommended Architecture: The Microservice Approach
-
-The most robust, scalable, and performant solution is a **dedicated microservice architecture**.
-
-```mermaid
-graph LR
-    A[Next.js Frontend] --> B{/api/dspy-optimize};
-    B --> C[DSPy Microservice (Python/FastAPI)];
-    subgraph Vercel Environment
-        A;
-        B;
-    end
-    subgraph Google Cloud Run / AWS Fargate
-        C;
-    end
+```bash
+npx create-t3-app@latest hanzi-ai-prompt-optimizer
 ```
 
-**Workflow:**
-1. The user enables "Auto-Optimization (DSPy)" in the UI and submits a prompt.
-2. The Next.js frontend calls its own backend API route (`/api/dspy-optimize`).
-3. This Next.js API route acts as a **secure proxy**. It reads the DSPy service URL from a server-side environment variable (`DSPY_API_URL`).
-4. It forwards the request to the independently deployed Python DSPy microservice.
-5. The DSPy service performs the optimization and returns the result to the Next.js proxy, which then sends it back to the frontend.
+When prompted, choose the following options:
+- **`Would you like to use TypeScript?`** ... (Yes, this is default)
+- **`Would you like to use Tailwind CSS?`** ... **Yes**
+- **`Would you like to use tRPC?`** ... **Yes**
+- **`Would you like to use authentication?`** ... **None** (Can be added later if needed)
+- **`Would you like to use a database ORM?`** ... **None for now** (We will add Prisma/Drizzle later for analytics)
+- **`Would you like your code inside a src/ directory?`** ... **Yes**
+- **`Would you like to use App Router?`** ... **Yes**
+- **`Would you like to customize the import alias?`** ... **No** (Keep the `@/*` default)
 
-**Why was this chosen over alternatives?**
-An alternative considered was spawning a Python process from the Vercel serverless function. This was rejected due to:
-- **High Latency:** Every request would suffer a "cold start," as the entire Python environment and its dependencies would need to be initialized.
-- **Execution Timeouts:** Vercel functions have timeouts (e.g., 10-60s). Complex DSPy compilation and optimization can easily exceed these limits, leading to unreliable performance.
-- **Lack of Scalability:** The frontend and backend tasks are fundamentally different; scaling them together is inefficient.
+This will create a new directory named `hanzi-ai-prompt-optimizer` with the correct project structure.
 
-The microservice approach solves these issues by allowing the DSPy service to remain "warm," scale independently, and handle long-running tasks reliably.
+### Step 2: Replace Files & Install Dependencies
 
-### 3. API Contract for DSPy Microservice
+1.  **Replace Generated Files:** Delete the contents of the generated project and replace them with the files provided in this repository.
+2.  **Install Dependencies:** Navigate into your new project directory and install the necessary libraries. The T3 boilerplate includes most dependencies, but you need to add the Google GenAI SDK.
 
-This section defines the precise API contract that the backend Python service must adhere to for seamless integration.
-
--   **Endpoint:** `/optimize`
--   **Method:** `POST`
--   **Content-Type:** `application/json`
-
-#### Request Body Schema
-
-The frontend will send a JSON object with the following structure:
-
-```json
-{
-  "prompt": "The user's original, un-optimized prompt.",
-  "industry": "none" | "tech" | "finance" | "medical" | "law" | "art",
-  "optimizationLevel": "basic" | "advanced" | "expert"
-}
+```bash
+cd hanzi-ai-prompt-optimizer
+npm install @google/genai
 ```
 
--   `prompt` (string, required): The raw text prompt from the user.
--   `industry` (string, required): The currently selected industry glossary. This allows the DSPy service to load relevant few-shot examples.
--   `optimizationLevel` (string, required): The user-selected level of optimization, which can be used by the backend to determine the number of optimization rounds or complexity.
+### Step 3: Configure Environment Variables
 
-#### Success Response Schema
+1.  In the root of your project, create a new file named `.env`.
+2.  Add your Google Gemini API key to this file. **Never commit this file to GitHub.**
 
-On a successful optimization (HTTP `200 OK`), the backend must return a JSON object with the following structure:
+```.env
+# .env
+# T3 automatically loads this for you.
+# Make sure to add .env to your .gitignore file.
 
-```json
-{
-  "optimizedPrompt": "The new prompt that has been refined by the DSPy module."
-}
+API_KEY="your_google_gemini_api_key_here"
 ```
 
--   `optimizedPrompt` (string, required): The resulting prompt after DSPy processing.
+The T3 starter includes a robust environment variable validation system (`src/env.js`) that ensures your app won't build or run without the required keys.
 
-#### Error Response Schema
+### Step 4: Run Locally & Deploy
 
-In case of an error (HTTP `4xx` or `5xx`), the backend should return a JSON object with an `error` key:
+1.  **Run Development Server:**
+    ```bash
+    npm run dev
+    ```
+    Open `http://localhost:3000` in your browser to see the application running.
 
-```json
-{
-  "error": "A descriptive error message explaining what went wrong."
-}
-```
+2.  **Deploy to Vercel:**
+    - Push your project to your GitHub repository.
+    - Connect the repository to Vercel. Vercel will automatically detect the Next.js framework.
+    - **Crucially**, in the Vercel project settings, go to "Environment Variables" and add your `API_KEY` with the same value from your `.env` file.
+    - Trigger a deployment.
 
-### 4. Implementation Plan & Next Steps
+---
 
-The frontend UI for this feature has been built and is currently mocked. The next phase is to build and deploy the backend microservice according to the API contract above.
+## Architecture Overview
 
-**Step 1: Build the DSPy Microservice (Python)**
-- Use a lightweight framework like **FastAPI**.
-- Use Pydantic to define models that match the **Request Body Schema**.
-- Create an `/optimize` endpoint that runs the DSPy `teleprompter.compile()` and execution logic.
-- Return a response matching the **Success Response Schema** or **Error Response Schema**.
-- *File: `dspy_service/app.py`*
+### Type-Safe API with tRPC
 
-**Step 2: Containerize the Service (Docker)**
-- Create a `Dockerfile` to package the FastAPI application and its Python dependencies (`dspy-ai`, `uvicorn`, etc.).
-- This ensures a consistent, reproducible environment.
+All communication between the frontend and backend is handled via tRPC. The Gemini API logic now resides securely on the server and is exposed to the client as a type-safe procedure.
 
-**Step 3: Deploy the Microservice**
-- Deploy the containerized application to a suitable platform.
-- **Recommended:** Google Cloud Run, AWS Fargate, or another container-as-a-service platform.
-- Once deployed, you will get a stable URL for the service.
+- **Frontend:** The main UI in `src/app/page.tsx` uses tRPC's React Query hooks (e.g., `api.prompt.optimize.useMutation`) to call the backend.
+- **Backend:** The tRPC router in `src/server/api/routers/prompt.ts` contains the server-side logic that securely calls the Google Gemini API.
 
-**Step 4: Configure the Next.js Environment**
-- In your Vercel project settings, add a new environment variable: `DSPY_API_URL`.
-- Set its value to the URL of your deployed Python service from Step 3.
+### DSPy Microservice Integration (Future)
 
-**Step 5: Create the Next.js Proxy Route**
-- Create a new API route file: `pages/api/dspy-optimize.ts`.
-- This route will receive the request from the frontend.
-- It will use `fetch` to call `process.env.DSPY_API_URL`, forwarding the prompt according to the API contract.
-- This keeps the microservice URL secure and hidden from the client.
+The plan for integrating the Python-based DSPy service remains the same. The tRPC backend will act as the secure proxy to the separately hosted Python microservice. The `optimizeWithDSPy` procedure is currently mocked and ready for this integration.
 
-**Step 6: Activate the Frontend UI**
-- **This step is complete.** The `optimizeWithDSPy` function in `services/geminiService.ts` contains the mocked logic. To make it live, replace the mocked `setTimeout` logic with a real `fetch` call to `/api/dspy-optimize`.
+### Analytics & Database (Future)
+
+The next major feature will be adding metrics tracking and analysis.
+- **Database:** We will use a serverless database like **Vercel Postgres** with **Prisma** as the ORM.
+- **Analytics:** For complex analysis of prompt history and performance, we will explore loading data from the primary database into an in-memory **DuckDB** instance within a serverless function to generate insights on demand.
