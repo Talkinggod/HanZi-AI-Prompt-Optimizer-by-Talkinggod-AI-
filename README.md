@@ -1,5 +1,5 @@
 
-# Talkinggod-AI-BilingualPromptOptimizer
+# Talkinggod-AI- HanZi Bilingual Prompt Optimizer
 "Efficiency through linguistic diversity. A cross-linguistic toolkit for optimizing LLM prompts by leveraging Chinese (ZH) token efficiency and Navajo-inspired linguistic principles. Reduce API costs by ~30% while maintaining precision. Open-source under AGPLv3, with commercial licensing available for enterprises."
 # Bilingual Prompt Optimizer 🐎🔠
 
