@@ -1,0 +1,5 @@
+{
+  "name": "HanZi  Prompt Optimizer",
+  "description": "An application to reduce the token count and optimize prompts sent to LLMs by eliminating unnecessary words and substituting with more token-efficient Chinese Hanzi and using best practice prompt engineering techniques where applicable, using Gemini to perform the optimization.",
+  "requestFramePermissions": []
+}
