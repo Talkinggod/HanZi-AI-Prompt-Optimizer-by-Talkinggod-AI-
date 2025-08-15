@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { Header } from './components/Header';
 import { PromptInput } from './components/PromptInput';
@@ -124,9 +125,7 @@ export default function App() {
       
       const endTime = performance.now();
       
-      if (result.needsClarification) {
-        setRfq({ active: true, question: result.question, promptForClarification: promptToOptimize });
-      } else {
+      if (result.needsClarification === false) {
         const newOptimizedPrompt = result.optimizedPrompt;
         const newTokenCounts = { original: result.originalTokens, optimized: result.optimizedTokens };
 
@@ -151,6 +150,8 @@ export default function App() {
           timestamp: new Date().toISOString(),
         };
         setHistory(prevHistory => [newHistoryItem, ...prevHistory].slice(0, 50)); // Keep last 50
+      } else {
+        setRfq({ active: true, question: result.question, promptForClarification: promptToOptimize });
       }
     } catch (e) {
       console.error(e);
