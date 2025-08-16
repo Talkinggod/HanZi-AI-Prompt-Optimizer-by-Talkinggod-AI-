@@ -1,5 +1,5 @@
 import React from 'react';
-import type { PerformanceMetrics } from '@/types';
+import type { PerformanceMetrics } from '../types';
 
 interface PerformanceMetricsDisplayProps {
   metrics: PerformanceMetrics | null;

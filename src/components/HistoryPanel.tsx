@@ -55,12 +55,25 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({ isOpen, history, onS
                 <div
                   key={item.id}
                   onClick={() => onSelect(item)}
-                  className="p-3 bg-brand-darker rounded-lg cursor-pointer hover:bg-opacity-80 hover:ring-1 hover:ring-brand-accent transition-all"
+                  className="p-3 bg-brand-darker rounded-lg cursor-pointer hover:bg-opacity-80 hover:ring-1 hover:ring-brand-accent transition-all space-y-2"
                 >
-                  <p className="text-sm text-brand-text truncate font-medium">
-                    {item.originalPrompt || '[Image Prompt]'}
-                  </p>
-                  <div className="flex justify-between items-center mt-2 text-xs text-brand-subtle">
+                  <div>
+                    <span className="text-xs text-brand-subtle">Original Prompt</span>
+                    <p className="text-sm text-brand-text truncate font-medium">
+                      {item.originalPrompt || '[Image Prompt]'}
+                    </p>
+                  </div>
+
+                  {item.negativePrompt && (
+                    <div className="border-t border-brand-dark pt-2">
+                        <span className="text-xs text-brand-subtle">Negative Prompt</span>
+                        <p className="text-sm text-gray-400 truncate">
+                            {item.negativePrompt}
+                        </p>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between items-center pt-2 text-xs text-brand-subtle">
                     <span>
                       {new Date(item.timestamp).toLocaleString()}
                     </span>

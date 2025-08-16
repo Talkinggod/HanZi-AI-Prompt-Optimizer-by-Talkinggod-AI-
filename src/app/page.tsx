@@ -217,6 +217,10 @@ export default function HomePage() {
     setPerformanceMetrics(null);
     setIsHistoryPanelOpen(false);
   };
+  
+  const handleImageRemove = () => {
+    setImageInput(null);
+  };
 
   const handleClearHistory = () => {
     setHistory([]);
@@ -289,6 +293,7 @@ export default function HomePage() {
                 disabled={isBusy}
                 imagePreview={imageInput}
                 onImageChange={setImageInput}
+                onImageRemove={handleImageRemove}
               />
               <ActionButtons
                 onOptimize={handleInitialOptimize}

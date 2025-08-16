@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconHistory, IconNotebook } from '@/components/IconComponents';
+import { IconHistory, IconNotebook } from './IconComponents';
 
 interface HeaderProps {
   onToggleHistory: () => void;

@@ -1,6 +1,6 @@
 import React from 'react';
-import type { OptimizationSettings as SettingsType, LegalOptimizationSettings, TechOptimizationSettings, FinanceOptimizationSettings, MedicalOptimizationSettings, ArtOptimizationSettings } from '@/types';
-import { IconCog, IconUpload } from './IconComponents';
+import type { OptimizationSettings as SettingsType, LegalOptimizationSettings, TechOptimizationSettings, FinanceOptimizationSettings, MedicalOptimizationSettings, ArtOptimizationSettings } from '../types';
+import { IconCog, IconUpload, IconXCircle } from './IconComponents';
 
 interface OptimizationSettingsProps {
     settings: SettingsType;
@@ -8,6 +8,7 @@ interface OptimizationSettingsProps {
     disabled: boolean;
     imagePreview: string | null;
     onImageChange: (base64Image: string | null) => void;
+    onImageRemove: () => void;
 }
 
 type NestedSettingsKey = 'legal' | 'tech' | 'finance' | 'medical' | 'art';
@@ -38,7 +39,7 @@ const Toggle: React.FC<{label: string, checked: boolean, onChange: (checked: boo
 );
 
 
-export const OptimizationSettings: React.FC<OptimizationSettingsProps> = ({ settings, onSettingsChange, disabled, imagePreview, onImageChange }) => {
+export const OptimizationSettings: React.FC<OptimizationSettingsProps> = ({ settings, onSettingsChange, disabled, imagePreview, onImageChange, onImageRemove }) => {
     const handleSettingChange = <K extends keyof SettingsType>(key: K, value: SettingsType[K]) => {
         onSettingsChange({ ...settings, [key]: value });
     };
@@ -216,7 +217,16 @@ export const OptimizationSettings: React.FC<OptimizationSettingsProps> = ({ sett
                             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-brand-darker border-dashed rounded-md">
                                 <div className="space-y-1 text-center">
                                     {imagePreview ? (
-                                        <img src={`data:image/jpeg;base64,${imagePreview}`} alt="Image preview" className="mx-auto h-24 w-auto rounded-md" />
+                                        <div className="relative group mx-auto">
+                                            <img src={`data:image/jpeg;base64,${imagePreview}`} alt="Image preview" className="h-24 w-auto rounded-md" />
+                                            <button 
+                                                onClick={onImageRemove}
+                                                className="absolute -top-2 -right-2 p-1 bg-red-600 rounded-full text-white opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                                                aria-label="Remove image"
+                                            >
+                                                <IconXCircle className="w-5 h-5" />
+                                            </button>
+                                        </div>
                                     ) : (
                                         <IconUpload className="mx-auto h-12 w-12 text-brand-subtle" />
                                     )}

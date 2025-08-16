@@ -1,10 +1,19 @@
 import React, { useState, useCallback } from 'react';
-import { IconSparkles, IconLoader, IconCopy, IconCheck } from '@/components/IconComponents';
+import { IconSparkles, IconLoader, IconCopy, IconCheck } from './IconComponents';
 
 interface ResponseDisplayProps {
   response: string;
   isLoading: boolean;
 }
+
+const SkeletonLoader: React.FC = () => (
+  <div className="space-y-3 animate-pulse">
+    <div className="h-4 bg-brand-darker rounded w-3/4"></div>
+    <div className="h-4 bg-brand-darker rounded w-full"></div>
+    <div className="h-4 bg-brand-darker rounded w-5/6"></div>
+    <div className="h-4 bg-brand-darker rounded w-1/2"></div>
+  </div>
+);
 
 export const ResponseDisplay: React.FC<ResponseDisplayProps> = ({ response, isLoading }) => {
   const [isCopied, setIsCopied] = useState(false);
@@ -39,9 +48,7 @@ export const ResponseDisplay: React.FC<ResponseDisplayProps> = ({ response, isLo
         )}
         
         {isLoading && !response && (
-            <div className="flex items-center justify-center h-full text-brand-subtle">
-                <p>Generating response...</p>
-            </div>
+           <SkeletonLoader />
         )}
         <div className="whitespace-pre-wrap font-mono text-sm pr-10">
             {response}
