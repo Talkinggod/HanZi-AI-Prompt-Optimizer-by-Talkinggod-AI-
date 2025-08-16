@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { GoogleGenAI, Type, Content } from "@google/genai";
 import { env } from "@/env";
-import type { OptimizationSettings, ArtOptimizationSettings, OptimizationResult, TechOptimizationSettings, FinanceOptimizationSettings, MedicalOptimizationSettings } from '@/types';
+import type { OptimizationSettings, ArtOptimizationSettings, OptimizationResult, TechOptimizationSettings, FinanceOptimizationSettings, MedicalOptimizationSettings } from '../../../types';
 
 // --- Zod Schemas for Type-Safe Inputs ---
 // These schemas ensure that the input to our tRPC procedures is valid.
@@ -264,7 +264,7 @@ export const promptRouter = createTRPCRouter({
       originalPromptForHistory: z.string(),
     }))
     .mutation(async ({ input }): Promise<OptimizationResult> => {
-      const startTime = Date.now();
+      const startTime = performance.now();
       
       // DSPy path (mocked)
       if (input.useDspy) {
@@ -277,13 +277,14 @@ export const promptRouter = createTRPCRouter({
             ai.models.countTokens({ model: responseModel, contents: input.prompt }),
             ai.models.countTokens({ model: responseModel, contents: optimizedPrompt }),
         ]);
+        const endTime = performance.now();
         return {
             needsClarification: false,
             optimizedPrompt,
             originalTokens: originalTokensResponse.totalTokens,
             optimizedTokens: optimizedTokensResponse.totalTokens,
-            startTime,
             originalPromptForHistory: input.originalPromptForHistory,
+            latency: Math.round(endTime - startTime),
         };
       }
 
@@ -347,14 +348,15 @@ export const promptRouter = createTRPCRouter({
           ai.models.countTokens({ model: responseModel, contents: originalTextForTokenCount }),
           ai.models.countTokens({ model: responseModel, contents: optimizedPrompt }),
       ]);
+      const endTime = performance.now();
 
       return {
           needsClarification: false,
           optimizedPrompt,
           originalTokens: originalTokensResponse.totalTokens,
           optimizedTokens: optimizedTokensResponse.totalTokens,
-          startTime,
           originalPromptForHistory: input.originalPromptForHistory,
+          latency: Math.round(endTime - startTime),
       };
     }),
 

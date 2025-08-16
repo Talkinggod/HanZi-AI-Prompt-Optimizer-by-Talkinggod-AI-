@@ -1,5 +1,5 @@
 import React from 'react';
-import type { AdvancedSettings } from '@/types';
+import type { AdvancedSettings } from '../types';
 import { IconCpuChip, IconCodeXml, IconLayers } from '@/components/IconComponents';
 
 interface AdvancedPanelProps {

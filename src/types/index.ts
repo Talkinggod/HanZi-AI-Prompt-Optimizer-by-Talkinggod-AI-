@@ -74,8 +74,8 @@ export type OptimizationSuccess = {
   optimizedPrompt: string;
   originalTokens: number;
   optimizedTokens: number;
-  startTime: number;
   originalPromptForHistory: string;
+  latency: number;
 };
 
 export type OptimizationClarification = {

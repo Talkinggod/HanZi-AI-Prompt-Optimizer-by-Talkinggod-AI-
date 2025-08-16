@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { PromptInput } from '@/components/PromptInput';
 import { StatsDisplay } from '@/components/StatsDisplay';
@@ -14,7 +14,8 @@ import { PerformanceMetricsDisplay } from '@/components/PerformanceMetricsDispla
 import { OptimizationSettings } from '@/components/OptimizationSettings';
 import { RfqDialog } from '@/components/RfqDialog';
 import { HistoryPanel } from '@/components/HistoryPanel';
-import type { TokenCounts, OptimizationSettings as OptimizationSettingsType, HistoryItem, PerformanceMetrics } from '@/types';
+import { NotesModal } from '@/components/NotesModal';
+import type { TokenCounts, OptimizationSettings as OptimizationSettingsType, HistoryItem, PerformanceMetrics } from '../types';
 import { api } from '@/utils/api';
 
 export default function HomePage() {
@@ -28,6 +29,8 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isHistoryPanelOpen, setIsHistoryPanelOpen] = useState<boolean>(false);
+  const [notes, setNotes] = useState<string>('');
+  const [isNotesModalOpen, setIsNotesModalOpen] = useState<boolean>(false);
   
   const [settings, setSettings] = useState<OptimizationSettingsType>({
     hanziDensity: 30,
@@ -77,7 +80,6 @@ export default function HomePage() {
   // --- tRPC Mutations ---
   const optimizationMutation = api.prompt.optimize.useMutation({
     onMutate: () => {
-      setIsLoadingOptimization(true);
       setError(null);
       setOptimizedPrompt('');
       setLlmResponse('');
@@ -85,7 +87,6 @@ export default function HomePage() {
       setPerformanceMetrics(null);
     },
     onSuccess: (result) => {
-      const endTime = performance.now();
       if (result.needsClarification === false) {
         const newOptimizedPrompt = result.optimizedPrompt;
         const newTokenCounts = { original: result.originalTokens, optimized: result.optimizedTokens };
@@ -93,7 +94,7 @@ export default function HomePage() {
         setOptimizedPrompt(newOptimizedPrompt);
         setTokenCounts(newTokenCounts);
         setPerformanceMetrics({
-          latency: Math.round(endTime - result.startTime),
+          latency: result.latency,
           semanticFidelity: parseFloat((0.92 + Math.random() * 0.07).toFixed(3)),
           instructionAdherence: parseFloat((0.95 + Math.random() * 0.04).toFixed(3)),
         });
@@ -115,15 +116,11 @@ export default function HomePage() {
     onError: (e) => {
       console.error(e);
       setError(e.message ?? 'An unknown error occurred during optimization.');
-    },
-    onSettled: () => {
-      setIsLoadingOptimization(false);
     }
   });
 
   const getResponseMutation = api.prompt.getResponse.useMutation({
     onMutate: () => {
-        setIsLoadingResponse(true);
         setError(null);
         setLlmResponse('');
     },
@@ -133,26 +130,19 @@ export default function HomePage() {
     onError: (e) => {
         console.error(e);
         setError(e.message ?? 'An unknown error occurred while fetching the response.');
-    },
-    onSettled: () => {
-        setIsLoadingResponse(false);
     }
   });
 
-  // Using state for mutation status as tRPC's isLoading is now `isPending`
-  const [isLoadingOptimization, setIsLoadingOptimization] = useState(false);
-  const [isLoadingResponse, setIsLoadingResponse] = useState(false);
-
-
-  // --- History Management ---
+  // --- Persistent State Management ---
   useEffect(() => {
     try {
       const storedHistory = localStorage.getItem('promptHistory');
-      if (storedHistory) {
-        setHistory(JSON.parse(storedHistory));
-      }
+      if (storedHistory) setHistory(JSON.parse(storedHistory));
+      
+      const storedNotes = localStorage.getItem('promptNotes');
+      if (storedNotes) setNotes(storedNotes);
     } catch (error) {
-      console.error("Failed to load history from localStorage", error);
+      console.error("Failed to load state from localStorage", error);
     }
   }, []);
 
@@ -164,13 +154,13 @@ export default function HomePage() {
     }
   }, [history]);
 
-  // Clear negative prompt when industry is not 'art'
   useEffect(() => {
-    if (settings.industryGlossary !== 'art') {
-      setNegativePrompt('');
+    try {
+      localStorage.setItem('promptNotes', notes);
+    } catch (error) {
+      console.error("Failed to save notes to localStorage", error);
     }
-  }, [settings.industryGlossary]);
-
+  }, [notes]);
 
   // --- Event Handlers ---
   const handleOptimizationRequest = useCallback((promptToOptimize: string) => {
@@ -231,9 +221,24 @@ export default function HomePage() {
   const handleClearHistory = () => {
     setHistory([]);
   };
-
-  const isBusy = isLoadingOptimization || isLoadingResponse || rfq.active;
   
+  const handleClearInputs = () => {
+    setOriginalPrompt('');
+    setNegativePrompt('');
+    setOptimizedPrompt('');
+    setLlmResponse('');
+    setTokenCounts({ original: 0, optimized: 0 });
+    setPerformanceMetrics(null);
+    setError(null);
+    setImageInput(null);
+  };
+
+  const isBusy = optimizationMutation.isPending || getResponseMutation.isPending || rfq.active;
+  
+  const isClearable = useMemo(() => {
+    return originalPrompt || negativePrompt || optimizedPrompt || llmResponse || imageInput;
+  }, [originalPrompt, negativePrompt, optimizedPrompt, llmResponse, imageInput]);
+
   const getPromptLabel = () => {
     if (settings.industryGlossary === 'art' && settings.art?.ideaInputType === 'concept') {
       return '1. Describe Your Concept or Idea';
@@ -245,8 +250,11 @@ export default function HomePage() {
   }
 
   return (
-    <div className={`min-h-screen bg-brand-darker text-brand-text font-sans ${isBusy || isHistoryPanelOpen ? 'overflow-hidden' : ''}`}>
-      <Header onToggleHistory={() => setIsHistoryPanelOpen(true)} />
+    <div className={`min-h-screen bg-brand-darker text-brand-text font-sans ${isBusy || isHistoryPanelOpen || isNotesModalOpen ? 'overflow-hidden' : ''}`}>
+      <Header 
+        onToggleHistory={() => setIsHistoryPanelOpen(true)} 
+        onToggleNotes={() => setIsNotesModalOpen(true)}
+      />
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-7xl mx-auto space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
@@ -265,9 +273,8 @@ export default function HomePage() {
                 placeholder="e.g., 'no text', 'blurry background', 'extra fingers'"
                 value={negativePrompt}
                 onChange={(e) => setNegativePrompt(e.target.value)}
-                disabled={isBusy || settings.industryGlossary !== 'art'}
+                disabled={isBusy}
                 rows={3}
-                tooltip={settings.industryGlossary !== 'art' ? "Only available for the 'Art & Design' glossary." : undefined}
               />
               <AdvancedPanel 
                 settings={settings.advanced}
@@ -286,10 +293,12 @@ export default function HomePage() {
               <ActionButtons
                 onOptimize={handleInitialOptimize}
                 onGetResponse={handleGetResponse}
-                isOptimizing={isLoadingOptimization}
-                isGettingResponse={isLoadingResponse}
+                onClearInputs={handleClearInputs}
+                isOptimizing={optimizationMutation.isPending}
+                isGettingResponse={getResponseMutation.isPending}
                 isPromptEmpty={!originalPrompt.trim() && !(settings.industryGlossary === 'art' && settings.art?.ideaInputType === 'image' && imageInput)}
                 isOptimizedPromptEmpty={!optimizedPrompt.trim()}
+                isClearable={!!isClearable}
               />
               <ErrorDisplay error={error} />
             </div>
@@ -299,14 +308,14 @@ export default function HomePage() {
               <PerformanceMetricsDisplay metrics={performanceMetrics} />
               <OptimizedOutput
                 prompt={optimizedPrompt}
-                isLoading={isLoadingOptimization}
+                isLoading={optimizationMutation.isPending}
               />
             </div>
           </div>
 
           <ResponseDisplay
             response={llmResponse}
-            isLoading={isLoadingResponse}
+            isLoading={getResponseMutation.isPending}
           />
         </div>
       </main>
@@ -325,6 +334,13 @@ export default function HomePage() {
         onSelect={handleSelectHistory}
         onClear={handleClearHistory}
         onClose={() => setIsHistoryPanelOpen(false)}
+      />
+
+      <NotesModal
+        isOpen={isNotesModalOpen}
+        notes={notes}
+        onNotesChange={setNotes}
+        onClose={() => setIsNotesModalOpen(false)}
       />
     </div>
   );

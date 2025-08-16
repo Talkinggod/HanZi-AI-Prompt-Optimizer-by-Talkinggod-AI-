@@ -10,18 +10,16 @@
   },
   "dependencies": {
     "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "@google/genai": "^1.13.0",
+    "@google/genai": "^1.14.0",
     "next": "^15.4.6",
-    "zod": "^4.0.17",
-    "tailwindcss": "^4.1.12",
-    "@trpc/client": "^11.4.4",
-    "@trpc/next": "^11.4.4",
-    "@trpc/server": "^11.4.4",
-    "@t3-oss/env-nextjs": "^0.13.8",
     "superjson": "^2.2.2",
     "@tanstack/react-query": "^5.85.3",
-    "@trpc/react-query": "^11.4.4"
+    "zod": "^4.0.17",
+    "tailwindcss": "^4.1.12",
+    "@trpc/server": "^11.4.4",
+    "@t3-oss/env-nextjs": "^0.13.8",
+    "@trpc/react-query": "^11.4.4",
+    "@trpc/client": "^11.4.4"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

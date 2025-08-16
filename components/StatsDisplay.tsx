@@ -1,5 +1,5 @@
 import React from 'react';
-import type { TokenCounts } from '../types';
+import type { TokenCounts } from '@/types';
 
 interface StatsDisplayProps {
   tokenCounts: TokenCounts;

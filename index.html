@@ -1,54 +1,19 @@
-
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gemini Prompt Economizer</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              'brand-primary': '#1e40af',
-              'brand-secondary': '#1d4ed8',
-              'brand-accent': '#3b82f6',
-              'brand-light': '#dbeafe',
-              'brand-dark': '#1e293b',
-              'brand-darker': '#0f172a',
-              'brand-text': '#e2e8f0',
-              'brand-subtle': '#94a3b8',
-            },
-          }
-        }
-      }
-    </script>
-  <script type="importmap">
+<script type="importmap">
 {
   "imports": {
     "react/": "https://esm.sh/react@^19.1.1/",
     "react": "https://esm.sh/react@^19.1.1",
-    "react-dom/": "https://esm.sh/react-dom@^19.1.1/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.13.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.14.0",
+    "next/": "https://esm.sh/next@^15.4.6/",
     "next": "https://esm.sh/next@^15.4.6",
+    "superjson": "https://esm.sh/superjson@^2.2.2",
+    "@tanstack/react-query": "https://esm.sh/@tanstack/react-query@^5.85.3",
     "zod": "https://esm.sh/zod@^4.0.17",
     "tailwindcss": "https://esm.sh/tailwindcss@^4.1.12",
-    "@trpc/client": "https://esm.sh/@trpc/client@^11.4.4",
-    "@trpc/next": "https://esm.sh/@trpc/next@^11.4.4",
     "@trpc/server": "https://esm.sh/@trpc/server@^11.4.4",
     "@t3-oss/env-nextjs": "https://esm.sh/@t3-oss/env-nextjs@^0.13.8",
-    "superjson": "https://esm.sh/superjson@^2.2.2",
-    "next/": "https://esm.sh/next@^15.4.6/",
-    "@tanstack/react-query": "https://esm.sh/@tanstack/react-query@^5.85.3",
-    "@trpc/react-query": "https://esm.sh/@trpc/react-query@^11.4.4"
+    "@trpc/react-query": "https://esm.sh/@trpc/react-query@^11.4.4",
+    "@trpc/client": "https://esm.sh/@trpc/client@^11.4.4"
   }
 }
 </script>
-</head>
-  <body class="bg-brand-darker">
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
-</html>

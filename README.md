@@ -1,97 +1,128 @@
+
 # HanZi Prompt Optimizer (T3 Stack Edition)
 
-This application optimizes LLM prompts by increasing token efficiency using Chinese Hanzi and applying advanced prompt engineering techniques. It is powered by the Google Gemini API and built on the T3 Stack for a fully type-safe, modern web experience.
+![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
 
-## The Stack
-
-- **Framework:** Next.js (App Router)
-- **API:** tRPC
-- **Styling:** Tailwind CSS
-- **Deployment:** Vercel
+An application to reduce the token count and optimize prompts sent to LLMs by eliminating unnecessary words, substituting with more token-efficient Chinese Hanzi, and using best-practice prompt engineering techniques. This version is a production-ready application built on the T3 Stack, with all API calls handled securely on the backend.
 
 ---
 
-## Project Setup & Deployment Guide
+## Key Features
 
-This project has been migrated from a buildless prototype to a professional T3 Stack application. Follow these steps to set up your local environment and deploy to Vercel.
+- **Secure Backend:** Your Gemini API key is never exposed to the browser. All API calls are proxied through a secure tRPC backend.
+- **Advanced Optimization:** Utilizes Hanzi substitution, classical Chinese idioms (Chengyu), and symbolic logic for maximum token economy.
+- **Industry Glossaries:** Specialized optimization modes for Tech, Finance, Medical, Law, and Art & Design.
+- **Image-to-Prompt (Art Mode):** Upload an image to generate a descriptive, optimized prompt for AI art generators like Midjourney or DALL-E 3.
+- **Negative Prompts:** Specify what you *don't* want in the output for more precise control.
+- **Prompt Middleware:** Apply advanced strategies like Chain-of-Thought, XML structuring, and model-specific optimizations.
+- **Persistent History & Notes:** Your session history and a personal notepad are saved in your browser's local storage.
+- **Fully Type-Safe:** Built with TypeScript and tRPC for end-to-end type safety, reducing bugs and improving developer experience.
 
-### Step 1: Create the T3 Application
+---
 
-On your local machine, run the `create-t3-app` command to generate the boilerplate. **It is crucial to select the options that match this project's structure.**
+## 1. Project Setup: Migrating from the Prototype
+
+This project has been upgraded from a simple HTML/TSX prototype to a full-stack T3 application. To avoid conflicts, it is **highly recommended to start with a fresh folder**.
+
+### Step 1: Clean Your Project Directory
+
+If you are working in your old project folder, you **must delete the obsolete files** from the original prototype.
+
+**Delete the following files and folders from the ROOT of your project:**
+
+-   `index.html`
+-   `index.tsx`
+-   `App.tsx`
+-   `types.ts` (the one in the root, not `src/types/index.ts`)
+-   `components/` (the entire folder in the root, not `src/components/`)
+-   `services/` (the entire folder)
+
+**Your project should now only contain the T3 Stack structure (`src/`, `package.json`, etc.).**
+
+### Step 2: Install Dependencies (macOS Terminal)
+
+Open your terminal, navigate to your clean project folder, and run this command. This will download all the necessary libraries for the project to run.
 
 ```bash
-npx create-t3-app@latest hanzi-ai-prompt-optimizer
-```
-
-When prompted, choose the following options:
-- **`Would you like to use TypeScript?`** ... (Yes, this is default)
-- **`Would you like to use Tailwind CSS?`** ... **Yes**
-- **`Would you like to use tRPC?`** ... **Yes**
-- **`Would you like to use authentication?`** ... **None** (Can be added later if needed)
-- **`Would you like to use a database ORM?`** ... **None for now** (We will add Prisma/Drizzle later for analytics)
-- **`Would you like your code inside a src/ directory?`** ... **Yes**
-- **`Would you like to use App Router?`** ... **Yes**
-- **`Would you like to customize the import alias?`** ... **No** (Keep the `@/*` default)
-
-This will create a new directory named `hanzi-ai-prompt-optimizer` with the correct project structure.
-
-### Step 2: Replace Files & Install Dependencies
-
-1.  **Replace Generated Files:** Delete the contents of the generated project and replace them with the files from this repository.
-2.  **Install Dependencies:** Navigate into your new project directory and install the necessary libraries. The T3 boilerplate includes most dependencies, but you need to add the Google GenAI SDK.
-
-```bash
-cd hanzi-ai-prompt-optimizer
 npm install
-npm install @google/genai
 ```
 
 ### Step 3: Configure Environment Variables
 
 1.  In the root of your project, create a new file named `.env`.
-2.  Add your Google Gemini API key to this file. **Never commit this file to GitHub.**
+2.  Add your Google Gemini API key to this file. The app will not run without it.
 
 ```.env
-# .env
-# T3 automatically loads this for you.
-# Make sure to add .env to your .gitignore file.
+# .env - This file is for local development and should NOT be committed to GitHub.
 
 API_KEY="your_google_gemini_api_key_here"
 ```
 
-The T3 starter includes a robust environment variable validation system (`src/env.js`) that ensures your app won't build or run without the required keys.
+---
 
-### Step 4: Run Locally & Deploy
+## 2. Running the App Locally
 
-1.  **Run Development Server:**
-    ```bash
-    npm run dev
-    ```
-    Open `http://localhost:3000` in your browser to see the application running.
+With the setup complete, you can run the local development server.
 
-2.  **Deploy to Vercel:**
-    - Push your project to your GitHub repository.
-    - Connect the repository to Vercel. Vercel will automatically detect the Next.js framework.
-    - **Crucially**, in the Vercel project settings, go to "Environment Variables" and add your `API_KEY` with the same value from your `.env` file.
-    - Trigger a deployment.
+```bash
+npm run dev
+```
+
+This command will start the server. Once it's ready, open your web browser and navigate to:
+
+**=> [http://localhost:3000](http://localhost:3000)**
+
+You will see your application running. The server will automatically reload whenever you save a change in a file inside the `src/` directory.
 
 ---
 
-## Architecture Overview
+## 3. GitHub & Vercel Deployment Guide
 
-### Type-Safe API with tRPC
+### Step 1: Sync with GitHub
 
-All communication between the frontend and backend is handled via tRPC. The Gemini API logic now resides securely on the server and is exposed to the client as a type-safe procedure.
+1.  Go to [GitHub](https://github.com) and create a new, empty repository. Do **not** initialize it with a README or .gitignore.
+2.  In your local project terminal, initialize Git and push your code to the new repository.
 
-- **Frontend:** The main UI in `src/app/page.tsx` uses tRPC's React Query hooks (e.g., `api.prompt.optimize.useMutation`) to call the backend.
-- **Backend:** The tRPC router in `src/server/api/routers/prompt.ts` contains the server-side logic that securely calls the Google Gemini API.
+```bash
+# Make sure you are in your project's root folder
+git init -b main
+git add .
+git commit -m "Initial commit of T3 HanZi Optimizer"
 
-### DSPy Microservice Integration (Future)
+# Get the repository URL from GitHub (it looks like https://github.com/YourUsername/YourRepoName.git)
+git remote add origin [YOUR_GITHUB_REPOSITORY_URL]
+git push -u origin main
+```
 
-The plan for integrating the Python-based DSPy service remains the same. The tRPC backend will act as the secure proxy to the separately hosted Python microservice. The `optimizeWithDSPy` procedure is currently mocked and ready for this integration.
+### Step 2: Deploy to Vercel
 
-### Analytics & Database (Future)
+1.  Go to [Vercel](https://vercel.com) and sign up or log in with your GitHub account.
+2.  On your dashboard, click "Add New... > Project".
+3.  Import the GitHub repository you just created. Vercel will automatically detect that it's a Next.js project.
+4.  **This is the most important step:** Before deploying, go to the "Environment Variables" section. Add a new variable:
+    -   **Name:** `API_KEY`
+    -   **Value:** Paste the same Google Gemini API key from your `.env` file.
+5.  Click the "Deploy" button. Vercel will build and deploy your application. Once finished, you will have a public URL for your live app.
 
-The next major feature will be adding metrics tracking and analysis.
-- **Database:** We will use a serverless database like **Vercel Postgres** with **Prisma** as the ORM.
-- **Analytics:** For complex analysis of prompt history and performance, we will explore loading data from the primary database into an in-memory **DuckDB** instance within a serverless function to generate insights on demand.
+---
+
+## 4. Technology & Dependencies
+
+-   **Framework:** Next.js
+-   **API Layer:** tRPC
+-   **Styling:** Tailwind CSS
+-   **State Management:** React Query (via tRPC)
+-   **Schema Validation:** Zod
+-   **Core AI SDK:** `@google/genai`
+
+---
+
+## 5. Backend Roadmap: DSPy Microservice
+
+The "Auto-Optimization (DSPy)" feature is currently mocked. The plan is to implement it as a separate Python-based microservice.
+
+-   **Why Python?** The DSPy framework from Stanford is a powerful Python library for programmatically optimizing prompts. It treats prompts as programs that can be compiled and improved with metrics.
+-   **Architecture:**
+    1.  A lightweight Python web server (e.g., using FastAPI) will host the DSPy logic.
+    2.  The Next.js tRPC backend will make secure, server-to-server API calls to this Python microservice when the DSPy option is enabled.
+    3.  This architecture separates concerns, allowing the Python service to focus solely on complex prompt optimization while the Next.js app handles the UI, state, and standard API calls.
