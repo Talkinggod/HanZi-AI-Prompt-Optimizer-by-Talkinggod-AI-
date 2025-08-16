@@ -6,6 +6,7 @@ export interface TokenCounts {
 export interface HistoryItem {
   id: string;
   originalPrompt: string;
+  negativePrompt?: string;
   optimizedPrompt: string;
   tokenCounts: TokenCounts;
   timestamp: string; // ISO string date
@@ -73,7 +74,7 @@ export type OptimizationSuccess = {
   optimizedPrompt: string;
   originalTokens: number;
   optimizedTokens: number;
-  startTime?: number;
+  startTime: number;
   originalPromptForHistory: string;
 };
 

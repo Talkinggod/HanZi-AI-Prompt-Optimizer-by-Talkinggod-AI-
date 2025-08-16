@@ -37,11 +37,12 @@ This will create a new directory named `hanzi-ai-prompt-optimizer` with the corr
 
 ### Step 2: Replace Files & Install Dependencies
 
-1.  **Replace Generated Files:** Delete the contents of the generated project and replace them with the files provided in this repository.
+1.  **Replace Generated Files:** Delete the contents of the generated project and replace them with the files from this repository.
 2.  **Install Dependencies:** Navigate into your new project directory and install the necessary libraries. The T3 boilerplate includes most dependencies, but you need to add the Google GenAI SDK.
 
 ```bash
 cd hanzi-ai-prompt-optimizer
+npm install
 npm install @google/genai
 ```
 

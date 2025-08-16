@@ -14,11 +14,12 @@ import { PerformanceMetricsDisplay } from '@/components/PerformanceMetricsDispla
 import { OptimizationSettings } from '@/components/OptimizationSettings';
 import { RfqDialog } from '@/components/RfqDialog';
 import { HistoryPanel } from '@/components/HistoryPanel';
-import type { TokenCounts, OptimizationSettings as OptimizationSettingsType, HistoryItem, PerformanceMetrics, OptimizationResult } from '@/types';
+import type { TokenCounts, OptimizationSettings as OptimizationSettingsType, HistoryItem, PerformanceMetrics } from '@/types';
 import { api } from '@/utils/api';
 
 export default function HomePage() {
   const [originalPrompt, setOriginalPrompt] = useState<string>('');
+  const [negativePrompt, setNegativePrompt] = useState<string>('');
   const [imageInput, setImageInput] = useState<string | null>(null); // For base64 image
   const [optimizedPrompt, setOptimizedPrompt] = useState<string>('');
   const [llmResponse, setLlmResponse] = useState<string>('');
@@ -92,7 +93,7 @@ export default function HomePage() {
         setOptimizedPrompt(newOptimizedPrompt);
         setTokenCounts(newTokenCounts);
         setPerformanceMetrics({
-          latency: Math.round(endTime - (result.startTime ?? endTime)),
+          latency: Math.round(endTime - result.startTime),
           semanticFidelity: parseFloat((0.92 + Math.random() * 0.07).toFixed(3)),
           instructionAdherence: parseFloat((0.95 + Math.random() * 0.04).toFixed(3)),
         });
@@ -101,6 +102,7 @@ export default function HomePage() {
         const newHistoryItem: HistoryItem = {
           id: Date.now().toString(),
           originalPrompt: result.originalPromptForHistory,
+          negativePrompt: negativePrompt,
           optimizedPrompt: newOptimizedPrompt,
           tokenCounts: newTokenCounts,
           timestamp: new Date().toISOString(),
@@ -162,6 +164,13 @@ export default function HomePage() {
     }
   }, [history]);
 
+  // Clear negative prompt when industry is not 'art'
+  useEffect(() => {
+    if (settings.industryGlossary !== 'art') {
+      setNegativePrompt('');
+    }
+  }, [settings.industryGlossary]);
+
 
   // --- Event Handlers ---
   const handleOptimizationRequest = useCallback((promptToOptimize: string) => {
@@ -182,12 +191,13 @@ export default function HomePage() {
 
     optimizationMutation.mutate({
       prompt: promptToOptimize,
+      negativePrompt: negativePrompt,
       settings: settings,
       imageInput: isArtImageMode ? imageInput : null,
       useDspy: settings.advanced.useDspy,
       originalPromptForHistory: rfq.active ? rfq.promptForClarification : promptToOptimize,
     });
-  }, [settings, originalPrompt, rfq.active, imageInput, optimizationMutation]);
+  }, [settings, originalPrompt, negativePrompt, rfq.active, imageInput, optimizationMutation]);
 
   const handleInitialOptimize = () => {
       handleOptimizationRequest(originalPrompt);
@@ -209,6 +219,7 @@ export default function HomePage() {
   
   const handleSelectHistory = (item: HistoryItem) => {
     setOriginalPrompt(item.originalPrompt);
+    setNegativePrompt(item.negativePrompt ?? '');
     setOptimizedPrompt(item.optimizedPrompt);
     setTokenCounts(item.tokenCounts);
     setLlmResponse('');
@@ -241,10 +252,22 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
             <div className="space-y-6">
               <PromptInput
+                id="original-prompt"
                 label={getPromptLabel()}
+                placeholder="e.g., A detailed step-by-step guide on how to bake a chocolate cake from scratch..."
                 value={originalPrompt}
                 onChange={(e) => setOriginalPrompt(e.target.value)}
                 disabled={isBusy}
+              />
+              <PromptInput
+                id="negative-prompt"
+                label="Negative Prompt"
+                placeholder="e.g., 'no text', 'blurry background', 'extra fingers'"
+                value={negativePrompt}
+                onChange={(e) => setNegativePrompt(e.target.value)}
+                disabled={isBusy || settings.industryGlossary !== 'art'}
+                rows={3}
+                tooltip={settings.industryGlossary !== 'art' ? "Only available for the 'Art & Design' glossary." : undefined}
               />
               <AdvancedPanel 
                 settings={settings.advanced}

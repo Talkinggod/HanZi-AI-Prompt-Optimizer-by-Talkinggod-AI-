@@ -1,7 +1,7 @@
 import "@/styles/globals.css";
-
 import { type Metadata } from "next";
-import { api } from "@/utils/api";
+import { TRPCReactProvider } from "@/trpc/react";
+import { headers } from "next/headers";
 
 export const metadata: Metadata = {
   title: "HanZi Prompt Optimizer",
@@ -9,14 +9,14 @@ export const metadata: Metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
-        {children}
+        <TRPCReactProvider headers={headers()}>
+          {children}
+        </TRPCReactProvider>
       </body>
     </html>
   );
 }
-
-export default api.withTRPC(RootLayout);
