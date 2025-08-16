@@ -1,6 +1,6 @@
 import React from 'react';
 import type { HistoryItem } from '../types';
-import { IconHistory, IconTrash, IconX } from '@/components/IconComponents';
+import { IconHistory, IconTrash, IconX } from './IconComponents';
 
 interface HistoryPanelProps {
   isOpen: boolean;
@@ -60,11 +60,6 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({ isOpen, history, onS
                   <p className="text-sm text-brand-text truncate font-medium">
                     {item.originalPrompt || '[Image Prompt]'}
                   </p>
-                  {item.negativePrompt && (
-                    <p className="text-xs text-red-400/70 truncate mt-1 italic">
-                      <span className="font-semibold not-italic">Negative:</span> {item.negativePrompt}
-                    </p>
-                  )}
                   <div className="flex justify-between items-center mt-2 text-xs text-brand-subtle">
                     <span>
                       {new Date(item.timestamp).toLocaleString()}

@@ -1,6 +1,6 @@
 import React from 'react';
 import type { OptimizationSettings as SettingsType, LegalOptimizationSettings, TechOptimizationSettings, FinanceOptimizationSettings, MedicalOptimizationSettings, ArtOptimizationSettings } from '../types';
-import { IconCog, IconUpload } from '@/components/IconComponents';
+import { IconCog, IconUpload } from './IconComponents';
 
 interface OptimizationSettingsProps {
     settings: SettingsType;
