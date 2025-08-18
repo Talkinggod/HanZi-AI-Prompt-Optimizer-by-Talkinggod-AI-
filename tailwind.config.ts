@@ -8,6 +8,7 @@ export default {
         'brand-primary': '#1e40af',
         'brand-secondary': '#1d4ed8',
         'brand-accent': '#3b82f6',
+        'brand-green': '#22c55e',
         'brand-light': '#dbeafe',
         'brand-dark': '#1e293b',
         'brand-darker': '#0f172a',

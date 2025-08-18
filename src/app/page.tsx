@@ -9,13 +9,12 @@ import { ResponseDisplay } from '@/components/ResponseDisplay';
 import { ActionButtons } from '@/components/ActionButtons';
 import { Footer } from '@/components/Footer';
 import { ErrorDisplay } from '@/components/ErrorDisplay';
-import { AdvancedPanel } from '@/components/AdvancedPanel';
 import { PerformanceMetricsDisplay } from '@/components/PerformanceMetricsDisplay';
-import { OptimizationSettings } from '@/components/OptimizationSettings';
+import { ConfigurationPanel } from '@/components/ConfigurationPanel';
 import { RfqDialog } from '@/components/RfqDialog';
 import { HistoryPanel } from '@/components/HistoryPanel';
 import { NotesModal } from '@/components/NotesModal';
-import type { TokenCounts, OptimizationSettings as OptimizationSettingsType, HistoryItem, PerformanceMetrics } from '../types';
+import type { TokenCounts, OptimizationSettings as OptimizationSettingsType, HistoryItem, PerformanceMetrics } from '@/types/index';
 import { api } from '@/utils/api';
 
 export default function HomePage() {
@@ -33,11 +32,14 @@ export default function HomePage() {
   const [isNotesModalOpen, setIsNotesModalOpen] = useState<boolean>(false);
   
   const [settings, setSettings] = useState<OptimizationSettingsType>({
-    hanziDensity: 30,
-    industryGlossary: 'none',
+    hanziDensity: 57,
+    industryGlossary: 'tech',
     classicalMode: false,
+    symbolicLogic: true,
+    contextWindow: 'ultra',
+    outputFormat: 'xml',
     advanced: {
-      targetModel: 'gemini',
+      targetModel: 'claude',
       useXml: true,
       reasoningStrategy: 'none',
       useDspy: false,
@@ -51,7 +53,7 @@ export default function HomePage() {
     },
     tech: {
       audience: 'developer',
-      codeStyle: 'fenced',
+      preferFencedCodeBlocks: true,
     },
     finance: {
       quantitativeFocus: true,
@@ -133,6 +135,19 @@ export default function HomePage() {
     }
   });
 
+  // --- PWA Service Worker Registration ---
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then(registration => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        }).catch(err => {
+          console.error('Service Worker registration failed:', err);
+        });
+      });
+    }
+  }, []);
+
   // --- Persistent State Management ---
   useEffect(() => {
     try {
@@ -140,7 +155,7 @@ export default function HomePage() {
       if (storedHistory) setHistory(JSON.parse(storedHistory));
       
       const storedNotes = localStorage.getItem('promptNotes');
-      if (storedNotes) setNotes(storedNotes);
+      if (storedNotes) setNotes(JSON.parse(storedNotes));
     } catch (error) {
       console.error("Failed to load state from localStorage", error);
     }
@@ -156,7 +171,7 @@ export default function HomePage() {
 
   useEffect(() => {
     try {
-      localStorage.setItem('promptNotes', notes);
+      localStorage.setItem('promptNotes', JSON.stringify(notes));
     } catch (error) {
       console.error("Failed to save notes to localStorage", error);
     }
@@ -225,8 +240,8 @@ export default function HomePage() {
   const handleClearHistory = () => {
     setHistory([]);
   };
-  
-  const handleClearInputs = () => {
+
+  const handleClearInputs = useCallback(() => {
     setOriginalPrompt('');
     setNegativePrompt('');
     setOptimizedPrompt('');
@@ -235,24 +250,15 @@ export default function HomePage() {
     setPerformanceMetrics(null);
     setError(null);
     setImageInput(null);
-  };
+  }, []);
+
+  const isClearable = useMemo(() => {
+    return !!(originalPrompt || negativePrompt || optimizedPrompt || llmResponse || imageInput || (tokenCounts && tokenCounts.original > 0) || performanceMetrics);
+  }, [originalPrompt, negativePrompt, optimizedPrompt, llmResponse, imageInput, tokenCounts, performanceMetrics]);
+
 
   const isBusy = optimizationMutation.isPending || getResponseMutation.isPending || rfq.active;
   
-  const isClearable = useMemo(() => {
-    return originalPrompt || negativePrompt || optimizedPrompt || llmResponse || imageInput;
-  }, [originalPrompt, negativePrompt, optimizedPrompt, llmResponse, imageInput]);
-
-  const getPromptLabel = () => {
-    if (settings.industryGlossary === 'art' && settings.art?.ideaInputType === 'concept') {
-      return '1. Describe Your Concept or Idea';
-    }
-     if (settings.industryGlossary === 'art' && settings.art?.ideaInputType === 'image') {
-      return '1. (Optional) Add Instructions for the Image';
-    }
-    return '1. Enter Your Original Prompt';
-  }
-
   return (
     <div className={`min-h-screen bg-brand-darker text-brand-text font-sans ${isBusy || isHistoryPanelOpen || isNotesModalOpen ? 'overflow-hidden' : ''}`}>
       <Header 
@@ -260,12 +266,13 @@ export default function HomePage() {
         onToggleNotes={() => setIsNotesModalOpen(true)}
       />
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="max-w-7xl mx-auto space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-            <div className="space-y-6">
+        <div className="max-w-4xl mx-auto space-y-6">
+          
+          <div className="p-6 bg-brand-dark rounded-lg border border-brand-darker/70 shadow-lg space-y-4">
+             <h2 className="text-xl font-bold text-white tracking-tight">1. Enter Your Original Prompt</h2>
               <PromptInput
                 id="original-prompt"
-                label={getPromptLabel()}
+                label="Original Prompt"
                 placeholder="e.g., A detailed step-by-step guide on how to bake a chocolate cake from scratch..."
                 value={originalPrompt}
                 onChange={(e) => setOriginalPrompt(e.target.value)}
@@ -273,50 +280,49 @@ export default function HomePage() {
               />
               <PromptInput
                 id="negative-prompt"
-                label="Negative Prompt"
-                placeholder="e.g., 'no text', 'blurry background', 'extra fingers'"
+                label="Negative Prompt (Exclude Terms)"
+                placeholder="e.g., verbose, redundant, complex"
                 value={negativePrompt}
                 onChange={(e) => setNegativePrompt(e.target.value)}
                 disabled={isBusy}
-                rows={3}
+                rows={2}
               />
-              <AdvancedPanel 
-                settings={settings.advanced}
-                onSettingsChange={(newAdvancedSettings) => {
-                  setSettings(s => ({ ...s, advanced: newAdvancedSettings }));
-                }}
-                disabled={isBusy}
-              />
-               <OptimizationSettings 
-                settings={settings}
-                onSettingsChange={setSettings}
-                disabled={isBusy}
-                imagePreview={imageInput}
-                onImageChange={setImageInput}
-                onImageRemove={handleImageRemove}
-              />
-              <ActionButtons
-                onOptimize={handleInitialOptimize}
-                onGetResponse={handleGetResponse}
-                onClearInputs={handleClearInputs}
-                isOptimizing={optimizationMutation.isPending}
-                isGettingResponse={getResponseMutation.isPending}
-                isPromptEmpty={!originalPrompt.trim() && !(settings.industryGlossary === 'art' && settings.art?.ideaInputType === 'image' && imageInput)}
-                isOptimizedPromptEmpty={!optimizedPrompt.trim()}
-                isClearable={!!isClearable}
-              />
-              <ErrorDisplay error={error} />
-            </div>
-
-            <div className="space-y-6">
-              <StatsDisplay tokenCounts={tokenCounts} />
-              <PerformanceMetricsDisplay metrics={performanceMetrics} />
-              <OptimizedOutput
-                prompt={optimizedPrompt}
-                isLoading={optimizationMutation.isPending}
-              />
-            </div>
           </div>
+
+          <ConfigurationPanel
+            settings={settings}
+            onSettingsChange={setSettings}
+            disabled={isBusy}
+            imagePreview={imageInput}
+            onImageChange={setImageInput}
+            onImageRemove={handleImageRemove}
+          />
+          
+          <div className="pt-2">
+            <ActionButtons
+              onOptimize={handleInitialOptimize}
+              onGetResponse={handleGetResponse}
+              onClearInputs={handleClearInputs}
+              isOptimizing={optimizationMutation.isPending}
+              isGettingResponse={getResponseMutation.isPending}
+              isPromptEmpty={!originalPrompt.trim() && !(settings.industryGlossary === 'art' && settings.art?.ideaInputType === 'image' && imageInput)}
+              isOptimizedPromptEmpty={!optimizedPrompt.trim()}
+              isClearable={isClearable}
+            />
+            <ErrorDisplay error={error} />
+          </div>
+
+          {(tokenCounts.original > 0 || performanceMetrics) && (
+            <div className="p-6 bg-brand-dark rounded-lg border border-brand-darker/70 shadow-lg grid grid-cols-1 md:grid-cols-2 gap-8">
+              {tokenCounts.original > 0 && <StatsDisplay tokenCounts={tokenCounts} />}
+              {performanceMetrics && <PerformanceMetricsDisplay metrics={performanceMetrics} />}
+            </div>
+          )}
+          
+          <OptimizedOutput
+            prompt={optimizedPrompt}
+            isLoading={optimizationMutation.isPending}
+          />
 
           <ResponseDisplay
             response={llmResponse}

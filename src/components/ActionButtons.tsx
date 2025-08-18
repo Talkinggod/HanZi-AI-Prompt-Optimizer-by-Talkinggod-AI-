@@ -29,7 +29,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       <button
         onClick={onOptimize}
         disabled={isPromptEmpty || isBusy}
-        className="col-span-2 sm:col-span-1 inline-flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-brand-primary hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-brand-darker focus:ring-brand-accent disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
+        className="col-span-2 sm:col-span-1 inline-flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-brand-green hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-brand-darker focus:ring-brand-green disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
       >
         {isOptimizing ? (
           <IconLoader className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
@@ -38,25 +38,18 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         )}
         <span>{isOptimizing ? 'Optimizing...' : '2. Optimize Prompt'}</span>
       </button>
-      <div className="relative group">
-        <button
-          onClick={onGetResponse}
-          disabled={isOptimizedPromptEmpty || isBusy}
-          className="w-full h-full inline-flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-brand-dark bg-brand-accent hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-brand-darker focus:ring-blue-500 disabled:bg-gray-500 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
-        >
-          {isGettingResponse ? (
-            <IconLoader className="animate-spin -ml-1 mr-3 h-5 w-5 text-brand-dark" />
-          ) : (
-            <IconSparkles className="-ml-1 mr-3 h-5 w-5" />
-          )}
-          <span>{isGettingResponse ? 'Generating...' : '3. Get Response'}</span>
-        </button>
-        {isOptimizedPromptEmpty && !isBusy && (
-          <div className="absolute z-10 bottom-full left-1/2 -translate-x-1/2 mb-2 w-max whitespace-nowrap px-2 py-1 bg-brand-darker text-brand-text text-xs font-medium rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              Optimize a prompt first
-          </div>
+      <button
+        onClick={onGetResponse}
+        disabled={isOptimizedPromptEmpty || isBusy}
+        className="inline-flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-brand-accent hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-brand-darker focus:ring-blue-500 disabled:bg-gray-500 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
+      >
+        {isGettingResponse ? (
+          <IconLoader className="animate-spin -ml-1 mr-3 h-5 w-5 text-brand-dark" />
+        ) : (
+          <IconSparkles className="-ml-1 mr-3 h-5 w-5" />
         )}
-      </div>
+        <span>{isGettingResponse ? 'Generating...' : '3. Get Response'}</span>
+      </button>
       <button
         onClick={onClearInputs}
         disabled={!isClearable || isBusy}

@@ -16,8 +16,8 @@ const legalOptimizationSettingsSchema = z.object({
 });
 
 const techOptimizationSettingsSchema = z.object({
-  audience: z.enum(['layman', 'developer', 'expert']),
-  codeStyle: z.enum(['inline', 'fenced']),
+  audience: z.enum(['developer', 'business', 'general', 'academic']),
+  preferFencedCodeBlocks: z.boolean(),
 });
 
 const financeOptimizationSettingsSchema = z.object({
@@ -51,6 +51,9 @@ const optimizationSettingsSchema = z.object({
   hanziDensity: z.number().min(0).max(100),
   industryGlossary: z.enum(['none', 'tech', 'finance', 'medical', 'law', 'art']),
   classicalMode: z.boolean(),
+  symbolicLogic: z.boolean(),
+  contextWindow: z.enum(['standard', 'extended', 'ultra']),
+  outputFormat: z.enum(['plaintext', 'xml', 'json']),
   advanced: advancedSettingsSchema,
   legal: legalOptimizationSettingsSchema.optional(),
   tech: techOptimizationSettingsSchema.optional(),

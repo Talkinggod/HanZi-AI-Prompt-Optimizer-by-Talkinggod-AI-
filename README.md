@@ -1,7 +1,7 @@
 
 # HanZi Prompt Optimizer (T3 Stack Edition)
 
-![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-4.0.0-blue.svg)
 
 An application to reduce the token count and optimize prompts sent to LLMs by eliminating unnecessary words, substituting with more token-efficient Chinese Hanzi, and using best-practice prompt engineering techniques. This version is a production-ready application built on the T3 Stack, with all API calls handled securely on the backend.
 

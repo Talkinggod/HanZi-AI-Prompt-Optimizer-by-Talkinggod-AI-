@@ -1,5 +1,5 @@
 import React from 'react';
-import type { OptimizationSettings as SettingsType, LegalOptimizationSettings, TechOptimizationSettings, FinanceOptimizationSettings, MedicalOptimizationSettings, ArtOptimizationSettings } from '../types';
+import type { OptimizationSettings as SettingsType, LegalOptimizationSettings, TechOptimizationSettings, ArtOptimizationSettings } from '@/types';
 import { IconCog, IconUpload, IconXCircle } from './IconComponents';
 
 interface OptimizationSettingsProps {
@@ -73,23 +73,16 @@ export const OptimizationSettings: React.FC<OptimizationSettingsProps> = ({ sett
         }
     };
 
-
     const formalityMap: {[key: string]: LegalOptimizationSettings['formality']} = { '1': 'brief', '2': 'memorandum', '3': 'law-review' };
     const formalityValueMap: {[key in LegalOptimizationSettings['formality']]: string} = { 'brief': '1', 'memorandum': '2', 'law-review': '3' };
     
-    const techAudienceMap: {[key: string]: TechOptimizationSettings['audience']} = { '1': 'layman', '2': 'developer', '3': 'expert' };
-    const techAudienceValueMap: {[key in TechOptimizationSettings['audience']]: string} = { 'layman': '1', 'developer': '2', 'expert': '3' };
-
-    const medicalEvidenceMap: {[key: string]: MedicalOptimizationSettings['evidenceLevel']} = { '1': 'anecdotal', '2': 'case-study', '3': 'systematic-review' };
-    const medicalEvidenceValueMap: {[key in MedicalOptimizationSettings['evidenceLevel']]: string} = { 'anecdotal': '1', 'case-study': '2', 'systematic-review': '3' };
-
     const commonSelectClass = "w-full p-2 bg-brand-darker border border-brand-dark rounded-md shadow-sm focus:ring-2 focus:ring-brand-accent focus:border-brand-accent transition duration-150 ease-in-out text-brand-text disabled:opacity-50 disabled:cursor-not-allowed";
     
     const RadioGroup: React.FC<{options: {value: string, label: string}[], selected: string, onChange: (value: string) => void}> = ({ options, selected, onChange }) => (
-        <div className="flex items-center gap-2 rounded-md bg-brand-darker p-1">
+        <div className="flex flex-wrap items-center gap-2 rounded-md bg-brand-darker p-1">
             {options.map(option => (
                  <button key={option.value} onClick={() => onChange(option.value)} disabled={disabled}
-                    className={`flex-1 text-center rounded py-1.5 text-sm font-medium transition-colors disabled:opacity-50
+                    className={`flex-1 text-center rounded py-1.5 px-3 text-sm font-medium transition-colors disabled:opacity-50
                         ${selected === option.value ? 'bg-brand-accent text-white shadow' : 'text-brand-subtle hover:bg-brand-dark'}`}>
                      {option.label}
                  </button>
@@ -98,9 +91,9 @@ export const OptimizationSettings: React.FC<OptimizationSettingsProps> = ({ sett
     );
 
     return (
-        <div className="p-4 bg-brand-dark rounded-lg border border-brand-darker space-y-4">
-            <h3 className="text-md font-semibold text-white flex items-center">
-                <IconCog className="w-5 h-5 mr-2 text-brand-subtle" />
+        <div className="p-6 bg-brand-dark rounded-lg border border-brand-darker/70 shadow-lg space-y-4">
+            <h3 className="text-xl font-bold text-white tracking-tight flex items-center">
+                <IconCog className="w-6 h-6 mr-3 text-brand-subtle" />
                 Advanced Optimization Settings
             </h3>
 
@@ -111,7 +104,7 @@ export const OptimizationSettings: React.FC<OptimizationSettingsProps> = ({ sett
                 </label>
                 <input
                     id="hanzi-density"
-                    type="range" min="0" max="100" step="5"
+                    type="range" min="0" max="100" step="1"
                     value={settings.hanziDensity}
                     onChange={(e) => handleSettingChange('hanziDensity', parseInt(e.target.value, 10))}
                     disabled={disabled}
@@ -119,33 +112,77 @@ export const OptimizationSettings: React.FC<OptimizationSettingsProps> = ({ sett
                 />
             </div>
 
-            {/* Industry Glossary Dropdown */}
-            <div className="space-y-2">
-                <label htmlFor="industry-glossary" className="block text-sm font-medium text-brand-subtle">
-                    Industry Glossary
-                </label>
-                <select
-                    id="industry-glossary"
-                    value={settings.industryGlossary}
-                    onChange={(e) => handleSettingChange('industryGlossary', e.target.value as SettingsType['industryGlossary'])}
-                    disabled={disabled}
-                    className={commonSelectClass}
-                >
-                    <option value="none">Default</option>
-                    <option value="tech">Technology</option>
-                    <option value="finance">Finance</option>
-                    <option value="medical">Medical</option>
-                    <option value="law">Law</option>
-                    <option value="art">Art & Design</option>
-                </select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Industry Glossary Dropdown */}
+                <div className="space-y-2">
+                    <label htmlFor="industry-glossary" className="block text-sm font-medium text-brand-subtle">
+                        Industry Glossary
+                    </label>
+                    <select
+                        id="industry-glossary"
+                        value={settings.industryGlossary}
+                        onChange={(e) => handleSettingChange('industryGlossary', e.target.value as SettingsType['industryGlossary'])}
+                        disabled={disabled}
+                        className={commonSelectClass}
+                    >
+                        <option value="none">Default</option>
+                        <option value="tech">Technology</option>
+                        <option value="finance">Finance</option>
+                        <option value="medical">Medical</option>
+                        <option value="law">Law</option>
+                        <option value="art">Art & Design</option>
+                    </select>
+                </div>
+                 {/* Context Window */}
+                <div className="space-y-2">
+                    <label htmlFor="context-window" className="block text-sm font-medium text-brand-subtle">
+                        Context Window
+                    </label>
+                    <select
+                        id="context-window"
+                        value={settings.contextWindow}
+                        onChange={(e) => handleSettingChange('contextWindow', e.target.value as SettingsType['contextWindow'])}
+                        disabled={disabled}
+                        className={commonSelectClass}
+                    >
+                        <option value="standard">Standard (4K+)</option>
+                        <option value="extended">Extended (32K+)</option>
+                        <option value="ultra">Ultra (100K+)</option>
+                    </select>
+                </div>
+                 {/* Output Format */}
+                <div className="space-y-2">
+                    <label htmlFor="output-format" className="block text-sm font-medium text-brand-subtle">
+                        Output Format
+                    </label>
+                    <select
+                        id="output-format"
+                        value={settings.outputFormat}
+                        onChange={(e) => handleSettingChange('outputFormat', e.target.value as SettingsType['outputFormat'])}
+                        disabled={disabled}
+                        className={commonSelectClass}
+                    >
+                        <option value="plaintext">Plain Text</option>
+                        <option value="xml">XML</option>
+                        <option value="json">JSON</option>
+                    </select>
+                </div>
             </div>
-            
-            <Toggle
-                label="Enable Classical Mode (Chengyu)"
-                checked={settings.classicalMode}
-                onChange={(checked) => handleSettingChange('classicalMode', checked)}
-                disabled={disabled}
-             />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 pt-2">
+                <Toggle
+                    label="Enable Classical Mode (Chengyu)"
+                    checked={settings.classicalMode}
+                    onChange={(checked) => handleSettingChange('classicalMode', checked)}
+                    disabled={disabled}
+                 />
+                <Toggle
+                    label="Symbolic Logic (∧∨¬)"
+                    checked={settings.symbolicLogic}
+                    onChange={(checked) => handleSettingChange('symbolicLogic', checked)}
+                    disabled={disabled}
+                 />
+            </div>
             
             {/* --- Context-Aware Settings Panels --- */}
 
@@ -153,12 +190,21 @@ export const OptimizationSettings: React.FC<OptimizationSettingsProps> = ({ sett
                  <div className="pt-4 mt-4 border-t border-brand-darker/50 space-y-4">
                      <h4 className="text-sm font-semibold text-brand-accent">Technology Optimization</h4>
                      <div className="space-y-2">
-                        <label htmlFor="tech-audience" className="block text-sm font-medium text-brand-subtle">
-                           Target Audience: <span className="font-bold text-brand-text capitalize">{settings.tech.audience}</span>
+                        <label className="block text-sm font-medium text-brand-subtle">
+                           Target Audience
                         </label>
-                        <input id="tech-audience" type="range" min="1" max="3" step="1" value={techAudienceValueMap[settings.tech.audience]} onChange={(e) => handleNestedSettingChange('tech', 'audience', techAudienceMap[e.target.value])} disabled={disabled} className="w-full h-2 bg-brand-darker rounded-lg appearance-none cursor-pointer accent-brand-accent disabled:opacity-50" />
+                        <RadioGroup 
+                           options={[
+                                {value: 'developer', label: 'Developer'}, 
+                                {value: 'business', label: 'Business'},
+                                {value: 'general', label: 'General'},
+                                {value: 'academic', label: 'Academic'}
+                            ]} 
+                            selected={settings.tech.audience} 
+                            onChange={(v) => handleNestedSettingChange('tech', 'audience', v as TechOptimizationSettings['audience'])} 
+                        />
                     </div>
-                     <Toggle label="Prefer Fenced Code Blocks" checked={settings.tech.codeStyle === 'fenced'} onChange={(checked) => handleNestedSettingChange('tech', 'codeStyle', checked ? 'fenced' : 'inline')} disabled={disabled} />
+                     <Toggle label="Prefer Fenced Code Blocks" checked={settings.tech.preferFencedCodeBlocks} onChange={(checked) => handleNestedSettingChange('tech', 'preferFencedCodeBlocks', checked)} disabled={disabled} />
                  </div>
             )}
 
@@ -179,10 +225,18 @@ export const OptimizationSettings: React.FC<OptimizationSettingsProps> = ({ sett
                  <div className="pt-4 mt-4 border-t border-brand-darker/50 space-y-4">
                      <h4 className="text-sm font-semibold text-brand-accent">Medical Optimization</h4>
                       <div className="space-y-2">
-                        <label htmlFor="evidence-level" className="block text-sm font-medium text-brand-subtle">
-                           Evidence Level: <span className="font-bold text-brand-text capitalize">{settings.medical.evidenceLevel.replace('-', ' ')}</span>
+                        <label className="block text-sm font-medium text-brand-subtle">
+                           Evidence Level
                         </label>
-                        <input id="evidence-level" type="range" min="1" max="3" step="1" value={medicalEvidenceValueMap[settings.medical.evidenceLevel]} onChange={(e) => handleNestedSettingChange('medical', 'evidenceLevel', medicalEvidenceMap[e.target.value])} disabled={disabled} className="w-full h-2 bg-brand-darker rounded-lg appearance-none cursor-pointer accent-brand-accent disabled:opacity-50" />
+                         <RadioGroup 
+                           options={[
+                                {value: 'anecdotal', label: 'Anecdotal'}, 
+                                {value: 'case-study', label: 'Case Study'},
+                                {value: 'systematic-review', label: 'Systematic Review'},
+                            ]} 
+                            selected={settings.medical.evidenceLevel} 
+                            onChange={(v) => handleNestedSettingChange('medical', 'evidenceLevel', v as any)} 
+                        />
                     </div>
                      <Toggle label="Anonymize PII" checked={settings.medical.anonymizePii} onChange={(checked) => handleNestedSettingChange('medical', 'anonymizePii', checked)} disabled={disabled} />
                  </div>

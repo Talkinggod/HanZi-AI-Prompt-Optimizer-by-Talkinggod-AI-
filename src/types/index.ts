@@ -20,8 +20,8 @@ export interface LegalOptimizationSettings {
 }
 
 export interface TechOptimizationSettings {
-  audience: 'layman' | 'developer' | 'expert';
-  codeStyle: 'inline' | 'fenced';
+  audience: 'developer' | 'business' | 'general' | 'academic';
+  preferFencedCodeBlocks: boolean;
 }
 
 export interface FinanceOptimizationSettings {
@@ -55,6 +55,9 @@ export interface OptimizationSettings {
   hanziDensity: number; // 0-100
   industryGlossary: 'none' | 'tech' | 'finance' | 'medical' | 'law' | 'art';
   classicalMode: boolean;
+  symbolicLogic: boolean;
+  contextWindow: 'standard' | 'extended' | 'ultra';
+  outputFormat: 'plaintext' | 'xml' | 'json';
   advanced: AdvancedSettings;
   legal?: LegalOptimizationSettings;
   tech?: TechOptimizationSettings;
